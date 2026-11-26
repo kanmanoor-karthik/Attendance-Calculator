@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Attendance Goal Calculator</title>
+<style>
+:root{--bg1:#f4f1ff;--bg2:#ffeef0;--card:rgba(255,255,255,.78);--tx:#1a1b3a;--mut:#6b6f95;--ac:#2f3a8f;--ac2:#e03131;--ok:#16a34a;--bad:#e03131;--bd:rgba(47,58,143,.16);--inp:#fff;--glow:rgba(224,49,49,.25);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg1:#0a0d2b;--bg2:#2a0c1c;--card:rgba(24,28,66,.72);--tx:#f1f2ff;--mut:#9ea3d4;--ac:#8c9bff;--ac2:#ff5c6c;--ok:#4ade80;--bad:#ff6b7a;--bd:rgba(140,155,255,.22);--inp:rgba(10,13,43,.7);--glow:rgba(255,92,108,.3)}}
+:root[data-theme="dark"]{--bg1:#0a0d2b;--bg2:#2a0c1c;--card:rgba(24,28,66,.72);--tx:#f1f2ff;--mut:#9ea3d4;--ac:#8c9bff;--ac2:#ff5c6c;--ok:#4ade80;--bad:#ff6b7a;--bd:rgba(140,155,255,.22);--inp:rgba(10,13,43,.7);--glow:rgba(255,92,108,.3)}
+html{scroll-padding-top:env(safe-area-inset-top,0px);min-height:100%}
+body{margin:0;min-height:100vh;color:var(--tx);background:radial-gradient(900px 500px at 10% -10%,var(--bg2),transparent 60%),radial-gradient(800px 500px at 100% 0,var(--bg1),transparent 55%),var(--bg1);background-attachment:fixed;font:16px/1.5 ui-rounded,"SF Pro Rounded","Nunito","Segoe UI",system-ui,sans-serif}
+main{max-width:520px;margin:0 auto;padding:18px 16px 48px}
+.hero{text-align:center;margin-bottom:14px}
+.bin{width:150px;height:140px;margin:0 auto -4px;display:block;overflow:visible}
+.lid{transform-origin:122px 62px;animation:wob 3.2s ease-in-out infinite}
+.fly{animation:buzz 1.6s ease-in-out infinite}.fly.b{animation-delay:-.8s}
+@keyframes wob{0%,70%,100%{transform:rotate(0)}78%{transform:rotate(-7deg)}86%{transform:rotate(3deg)}}
+@keyframes buzz{0%,100%{transform:translate(0,0)}25%{transform:translate(6px,-5px)}50%{transform:translate(-3px,-9px)}75%{transform:translate(-7px,-2px)}}
+@media (prefers-reduced-motion:reduce){.lid,.fly{animation:none}}
+h1{font-size:26px;line-height:1.15;margin:6px 0 4px;letter-spacing:-.02em}
+h1 em{font-style:normal;background:linear-gradient(90deg,var(--ac2),var(--ac));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--mut);margin:0 0 6px;font-size:14px}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;background:var(--glow);color:var(--ac2);transform:rotate(-2deg);margin-bottom:6px}
+.card{background:var(--card);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--bd);border-radius:20px;padding:16px;margin-bottom:14px;box-shadow:0 10px 30px -14px var(--glow)}
+label{display:block;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--mut);margin:12px 0 5px}
+input,textarea,select{width:100%;font:inherit;color:var(--tx);background:var(--inp);border:1.5px solid var(--bd);border-radius:12px;padding:11px;box-sizing:border-box;outline:none;transition:border-color .15s,box-shadow .15s}
+input:focus,textarea:focus,select:focus{border-color:var(--ac2);box-shadow:0 0 0 3px var(--glow)}
+.row{display:flex;gap:10px}.row>div{flex:1}
+.days{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.days input{text-align:center;padding:9px 2px}
+.days small{display:block;text-align:center;font-size:11px;color:var(--mut);font-weight:700}
+button{width:100%;margin-top:16px;padding:14px;border:0;border-radius:14px;background:linear-gradient(135deg,var(--ac2),#b3202f 60%,var(--ac));color:#fff;font:800 17px inherit;letter-spacing:.01em;cursor:pointer;box-shadow:0 10px 24px -10px var(--ac2);transition:transform .12s}
+button:active{transform:scale(.97)}
+.big{font-size:30px;font-weight:900;line-height:1.15;letter-spacing:-.02em}
+.ok{color:var(--ok)}.bad{color:var(--bad)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.grid div{background:var(--inp);border:1px solid var(--bd);border-radius:14px;padding:12px}
+.grid b{display:block;font-size:22px}.grid span{font-size:12px;color:var(--mut)}
+details{font-size:14px;color:var(--mut)}summary{cursor:pointer;font-weight:700;color:var(--tx)}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px;margin-top:8px}
+td,th{padding:6px 8px;border-bottom:1px solid var(--bd);text-align:left;white-space:nowrap}
+.foot{text-align:center;font-size:12px;color:var(--mut)}
+</style>
+</head>
+<body>
+<main>
+<div class="hero">
+<svg class="bin" viewBox="0 0 160 150" role="img" aria-label="University logo thrown in a trash can">
+  <g transform="rotate(-16 80 52)">
+    <polygon points="38,66 58,10 74,10 74,26 58,66" fill="#233a7a"/>
+    <path d="M92 8 V42 Q92 62 106 62 Q120 62 120 42 V8" fill="none" stroke="#e03131" stroke-width="15"/>
+  </g>
+  <path d="M38 70 H118 L110 142 Q109 146 105 146 H51 Q47 146 46 142 Z" fill="#8a93a8"/>
+  <path d="M58 78 L61 140 M80 78 V140 M102 78 L99 140" stroke="#6c7589" stroke-width="5" stroke-linecap="round"/>
+  <g class="lid"><rect x="30" y="58" width="96" height="12" rx="6" fill="#a4acc0"/><rect x="68" y="50" width="20" height="9" rx="4" fill="#a4acc0"/></g>
+  <g fill="var(--tx)" opacity=".8"><circle class="fly" cx="30" cy="40" r="2.4"/><circle class="fly b" cx="132" cy="30" r="2.4"/></g>
+  <path d="M26 22 q6 -8 0 -16 M138 20 q6 -8 0 -16" stroke="var(--mut)" stroke-width="2" fill="none" stroke-linecap="round" opacity=".7"/>
+</svg>
+<span class="tag">attendance edition</span>
+<h1>Attendance <em>cooked?</em> 💀<br>Let’s unfry it.</h1>
+<p class="sub">No cap: pick a target and we’ll tell you exactly how many classes to show up for.</p>
+</div>
+
+<div class="card">
+  <div class="row">
+    <div><label>Current %</label><input id="cur" type="number" min="0" max="100" step="0.1" placeholder="Enter Current Percentage"></div>
+    <div><label>Target %</label><input id="tgt" type="number" min="1" max="100" step="0.1" placeholder="Enter Target"></div>
+  </div>
+  <label>What do you want to know?</label>
+  <select id="mode"><option value="reach">When will I reach my target?</option><option value="skip">How many classes can I skip and still finish at my target?</option></select>
+  <label>Today’s date (counts from here)</label>
+  <input id="today" type="date">
+  <button id="go">Run the numbers 🚀</button>
+</div>
+
+<div class="card" id="out" hidden></div>
+
+<div class="card">
+  <details>
+    <summary>Timetable and calendar settings</summary>
+    <label>Class hours per day (set 0 for days off)</label>
+    <h14>  *Not your Schedule? Change the number of Classes</h14>
+    <br></br>
+    <div class="days">
+      <div><small>Mon</small><input id="h0" type="number" min="0" value="7"></div><div><small>Tue</small><input id="h1" type="number" min="0" value="7"></div><div><small>Wed</small><input id="h2" type="number" min="0" value="7"></div><div><small>Thu</small><input id="h3" type="number" min="0" value="6"></div><div><small>Fri</small><input id="h4" type="number" min="0" value="7"></div><div><small>Sat</small><input id="h5" type="number" min="0" value="0"></div>
+    </div>
+    <div class="row">
+      <div><label>Semester start date</label><input id="s0" type="date" value="2026-11-25"></div>
+      <div><label>Semester end date</label><input id="s1" type="date" value="2027-03-31"></div>
+    </div>
+    <label>Breaks with no classes: exams, vacations (one per line: start,end)</label>
+    <textarea id="breaks" rows="3">2027-01-09,2027-01-17
+2027-03-01,2027-03-03</textarea>
+    <label>Holidays (comma separated, YYYY-MM-DD)</label>
+    <textarea id="hol" rows="2">2026-12-25,2027-01-26,2027-03-26</textarea>
+  </details>
+</div>
+<p class="foot">Made by a student, for students. Not affiliated with the bin. 🗑️</p>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+const pd=s=>{const[a,b,c]=s.split("-").map(Number);return new Date(a,b-1,c)};
+const fmt=d=>d.toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short",year:"numeric"});
+const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+$("today").value=iso(new Date());
+
+function classDays(){
+  const H=[0,1,2,3,4,5].map(i=>+$("h"+i).value||0);
+  const hol=new Set($("hol").value.split(/[\s,]+/).filter(Boolean));
+  const brk=$("breaks").value.trim().split("\n").map(l=>l.split(",").map(s=>s.trim())).filter(p=>p.length==2&&p[0]&&p[1]);
+  const off=d=>{const t=iso(d);return hol.has(t)||brk.some(([a,b])=>t>=a&&t<=b)};
+  const days=[];
+  if(!$("s0").value||!$("s1").value)return days;
+  for(let d=pd($("s0").value),e=pd($("s1").value);d<=e;d.setDate(d.getDate()+1)){
+    const w=d.getDay();
+    if(w>=1&&w<=6&&H[w-1]>0&&!off(d))days.push({d:new Date(d),h:H[w-1]});
+  }
+  return days;
+}
+const perWeek=()=>[0,1,2,3,4,5].filter(i=>+$("h"+i).value>0).length||5;
+
+function calc(){
+  const cur=+$("cur").value,tgt=+$("tgt").value,today=pd($("today").value);
+  const out=$("out");out.hidden=false;
+  if(!(tgt>0&&tgt<=100&&cur>=0&&cur<=100)){out.innerHTML='<span class="bad">Enter valid percentages.</span>';return}
+  const days=classDays();
+  const past=days.filter(x=>x.d<today),fut=days.filter(x=>x.d>=today);
+  const hp=past.reduce((s,x)=>s+x.h,0);
+  if(!fut.length){out.innerHTML='<span class="bad">No class days left on or after this date. Check the semester dates in settings.</span>';return}
+  if($("mode").value==="skip"){
+    const rem=fut.reduce((s,x)=>s+x.h,0),T=hp+rem,a=cur/100*hp;
+    const must=Math.ceil(tgt/100*T-a-1e-9),skip=rem-must;
+    const wk=(fut.length/perWeek());
+    if(skip<0){
+      out.innerHTML='<div class="big bad">No skips left, lock in 🔒</div>Even attending every remaining class, you’d finish at about <b>'+((a+rem)/T*100).toFixed(1)+'%</b>, below '+tgt+'%.';
+      return;
+    }
+    out.innerHTML='<div class="big ok">'+skip+' hours</div>That’s your bunk budget from today while still finishing at '+tgt+'% or more. Spend it wisely. 😌'
+      +'<div class="grid"><div><b>'+(skip/6).toFixed(1)+'</b><span>days at 6 h/day</span></div><div><b>'+(skip/(rem/fut.length)).toFixed(1)+'</b><span>full working days</span></div>'
+      +'<div><b>'+must+' / '+rem+'</b><span>hours to attend / remaining</span></div><div><b>'+(skip/wk).toFixed(1)+'</b><span>hours per week on average</span></div></div>'
+      +'<p class="sub" style="margin-top:12px">Total semester: '+T+' h. Held before today: '+hp+' h, attended about '+a.toFixed(0)+' h. Your % will dip while you skip, so spread the skips out and keep a buffer.</p>';
+    return;
+  }
+  if(cur>=tgt){out.innerHTML='<div class="big ok">Already a W 😎</div>You’re at '+cur+'%, which meets your '+tgt+'% target.';return}
+  let att=cur/100*hp,tot=hp,n=0,hit=null,rows=[];
+  for(const x of fut){
+    att+=x.h;tot+=x.h;n++;
+    const p=att/tot*100;
+    if(rows.length<14)rows.push([fmt(x.d),x.h,p.toFixed(1)]);
+    if(p>=tgt-1e-9){hit={x,n,p,hrs:tot-hp};break}
+  }
+  const totalSem=hp+fut.reduce((s,x)=>s+x.h,0);
+  const maxP=((cur/100*hp+fut.reduce((s,x)=>s+x.h,0))/totalSem*100).toFixed(1);
+  const hrsBase='Classes held before today: '+hp+' h. Attended so far: about '+(cur/100*hp).toFixed(0)+' h.';
+  let html;
+  if(hit){
+    const weeks=(hit.n/perWeek()).toFixed(1);
+    html='<div class="big ok">'+fmt(hit.x.d)+'</div>You hit '+tgt+'% on this day if you attend every single class. Lock in. 🔒'
+      +'<div class="grid"><div><b>'+hit.n+'</b><span>working days</span></div><div><b>'+hit.hrs+'</b><span>hours to attend</span></div>'
+      +'<div><b>'+(hit.hrs/6).toFixed(1)+'</b><span>days at 6 h/day</span></div><div><b>'+weeks+'</b><span>weeks</span></div></div>'
+      +'<p class="sub" style="margin-top:12px">'+hrsBase+'</p>'
+      +'<details><summary>Day-by-day progress</summary><div class="scroll"><table><tr><th>Date</th><th>Hours</th><th>Attendance %</th></tr>'
+      +rows.map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>').join('')+'</table></div></details>';
+  }else{
+    html='<div class="big bad">Cooked 💀</div>Even attending every class until the semester ends, you’d finish at about <b>'+maxP+'%</b>, below your '+tgt+'% target.<p class="sub">'+hrsBase+'</p>';
+  }
+  out.innerHTML=html;
+}
+$("go").onclick=calc;
+</script>
+</body>
+</html>
